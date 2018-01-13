@@ -11,6 +11,8 @@ from typing import List
 from termcolor import colored
 
 from conf import partitions
+from conf import strategies
+from conf import params_default
 from evolution.individual_base import Individual
 from objective_function import soft_maximum_worst_case
 from parsing import parse_trades, args_for_strategy
@@ -43,13 +45,22 @@ class Andividual(Individual):
     BASE_COMMAND = 'env node ../../zenbot.js sim {instrument} --strategy {strategy} --avg_slippage_pct 0.33 --filename temp.html'
     def __init__(self, *args,**kwargs):
         super(Andividual, self).__init__(*args, **kwargs)
-        self.args = args_for_strategy(self.strategy)
-        # period and periodLength are the same and yield errors
-        # if both are used.
-        self.args = [a for a in self.args if a != 'periodLength']
+        # self.args = args_for_strategy(self.strategy)
+        # # period and periodLength are the same and yield errors
+        # # if both are used.
+        # self.args = [a for a in self.args if a != 'periodLength']
+        #
+        # for _ in self.args:
+        #     self.append(50 + (random.random() - 0.5) * 100)
 
-        for _ in self.args:
-            self.append(50 + (random.random() - 0.5) * 100)
+        # arguments - parameter names
+        self.args = []
+        # values for arguments
+        for arg, desc in params_default[self.strategy].items():
+            self.args.append(arg)
+            mid = desc['default']
+            sig = desc['std']
+            self.append(np.random.normal(mid, sig))
 
     def __repr__(self):
         return colored(f"{self.cmdline}  {super(Andividual, self).__repr__()}", 'grey')
@@ -106,94 +117,98 @@ class Andividual(Individual):
         return (value / period)
 
     def convert(self, param, value):
-        if param == 'period':
-            res = minutes(int(value/2))
-        elif param == 'min_periods':
-            res = int(value*20)
-        elif param == 'trend_ema':
-            res = int(value*15)
-        elif 'period' in param:
-            res = int(value*10)
-        elif 'pct' in param:
-            res = pct(value)
-        elif 'rate' in param:
-            res = pct(value)
-        elif 'rsi' in param:
-            res = float(value)
-        elif 'sell' in param:
-            res = value/10.0
-        elif 'buy' in param:
-            res = value/10.0
-        elif 'threshold' in param:
-            res = value/100000.0
-        elif 'sar_af' == param:
-            res = value/1000.0
-        elif 'sar_max_af' == param:
-            res = pct(value)
-        elif 'greed' == param:
-            res = value/10.0
-        elif 'lastpoints' == param:
-            res = int(value)
-        elif 'avgpoints' == param:
-            res = 10 * int(value)
-        elif 'lastpoints2' == param:
-            res = int(value/10)
-        elif 'avgpoints2' == param:
-            res = int(value/10)
-        elif 'markup_sell_pkt' == param:
-            res = value
-        elif 'markup_buy_pkt' == param:
-            res = value
-        elif 'sell_threshold' in param:
-            res = value/100000.0
-        elif 'sell_threshold_max' in param:
-            res = value/100000.0
-        elif 'sell_min' in param:
-            res = value/100000.0
-        elif 'buy_threshold' in param:
-            res = value/100000.0
-        elif 'buy_threshold_max' in param:
-            res = value/100000.0
-        elif 'trigger_factor' == param:
-            res = value/1000.0
-        elif 'ema_acc' == param:
-            res = value/1000000.0
-        elif 'srsi' in param:
-            res = value/100000.0
-        elif 'oversold_cci' == param:
-            res = -value/1000.0
-        elif 'overbought_cci' == param:
-            res = value/1000.0
-        elif 'constant' == param:
-            res = value/1000000.0
-        elif 'ema' in param:
-            res = value/100000.0
-        elif 'sma' in param:
-            res = value/100000.0
-        elif 'vwap_length' == param:
-            res = value/100000.0
-        elif 'vwap_max' == param:
-            res = value/1000.0
-        elif 'activation_1_type' == param:
-            res = np.random.choice(['sigmoid', 'tanh', 'relu'])
-        elif 'neurons_1' == param:
-            res = value/100000.0
-        elif 'depth' == param:
-            res = value/100000.0
-        elif 'selector' == param:
-            res = self.instrument
-        elif 'min_predict' == param:
-            res = value/1000000.0
-        elif 'momentum' == param:
-            res = value/1000000.0
-        elif 'threads' == param:
-            res = value/1000000.0
-        elif 'learns' == param:
-            res = value/1000000.0
-        elif 'decay' == param:
-            res = value/1000000.0
-        else:
-            raise ValueError(colored(f"I don't understand {param} please add it to evaluation.py", 'red'))
+        dtype = params_default[self.strategy][param]['dtype']
+        res = dtype(value)
+        if params_default[self.strategy][param]['unit'] == 'm':
+            res = minutes(int(res))
+        # if param == 'period':
+        #     res = minutes(int(value/2))
+        # elif param == 'min_periods':
+        #     res = int(value*20)
+        # elif param == 'trend_ema':
+        #     res = int(value*15)
+        # elif 'period' in param:
+        #     res = int(value*10)
+        # elif 'pct' in param:
+        #     res = pct(value)
+        # elif 'rate' in param:
+        #     res = pct(value)
+        # elif 'rsi' in param:
+        #     res = float(value)
+        # elif 'sell' in param:
+        #     res = value/10.0
+        # elif 'buy' in param:
+        #     res = value/10.0
+        # elif 'threshold' in param:
+        #     res = value/100000.0
+        # elif 'sar_af' == param:
+        #     res = value/1000.0
+        # elif 'sar_max_af' == param:
+        #     res = pct(value)
+        # elif 'greed' == param:
+        #     res = value/10.0
+        # elif 'lastpoints' == param:
+        #     res = int(value)
+        # elif 'avgpoints' == param:
+        #     res = 10 * int(value)
+        # elif 'lastpoints2' == param:
+        #     res = int(value/10)
+        # elif 'avgpoints2' == param:
+        #     res = int(value/10)
+        # elif 'markup_sell_pkt' == param:
+        #     res = value
+        # elif 'markup_buy_pkt' == param:
+        #     res = value
+        # elif 'sell_threshold' in param:
+        #     res = value/100000.0
+        # elif 'sell_threshold_max' in param:
+        #     res = value/100000.0
+        # elif 'sell_min' in param:
+        #     res = value/100000.0
+        # elif 'buy_threshold' in param:
+        #     res = value/100000.0
+        # elif 'buy_threshold_max' in param:
+        #     res = value/100000.0
+        # elif 'trigger_factor' == param:
+        #     res = value/1000.0
+        # elif 'ema_acc' == param:
+        #     res = value/1000000.0
+        # elif 'srsi' in param:
+        #     res = value/100000.0
+        # elif 'oversold_cci' == param:
+        #     res = -value/1000.0
+        # elif 'overbought_cci' == param:
+        #     res = value/1000.0
+        # elif 'constant' == param:
+        #     res = value/1000000.0
+        # elif 'ema' in param:
+        #     res = value/100000.0
+        # elif 'sma' in param:
+        #     res = value/100000.0
+        # elif 'vwap_length' == param:
+        #     res = value/100000.0
+        # elif 'vwap_max' == param:
+        #     res = value/1000.0
+        # elif 'activation_1_type' == param:
+        #     res = np.random.choice(['sigmoid', 'tanh', 'relu'])
+        # elif 'neurons_1' == param:
+        #     res = value/100000.0
+        # elif 'depth' == param:
+        #     res = value/100000.0
+        # elif 'selector' == param:
+        #     res = self.instrument
+        # elif 'min_predict' == param:
+        #     res = value/1000000.0
+        # elif 'momentum' == param:
+        #     res = value/1000000.0
+        # elif 'threads' == param:
+        #     res = value/1000000.0
+        # elif 'learns' == param:
+        #     res = value/1000000.0
+        # elif 'decay' == param:
+        #     res = value/1000000.0
+        # else:
+        #     raise ValueError(colored(f"I don't understand {param} please add it to evaluation.py", 'red'))
         return param, res
 
 
@@ -205,6 +220,8 @@ def evaluate_zen(cmdline:str, days: int):
         fitness = []
         for period in periods:
             cmd = ' '.join([cmdline, period])
+            print('evaluating')
+            print(cmd)
             f,t = runzen(cmd)
             fitness.append(f)
             if t==0:

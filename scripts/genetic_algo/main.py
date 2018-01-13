@@ -1,11 +1,12 @@
 import sys
 from functools import partial
+from numpy import random
 
 from deap.tools import cxTwoPoint, mutGaussian
 from scoop import shared
 from termcolor import colored
 
-from conf import indpb, sigma, partitions, selectors
+from conf import indpb, sigma, partitions, selectors, strategies
 from evaluation import evaluate_zen, Andividual
 from evolution import evolve
 import parsing
@@ -26,8 +27,9 @@ def main(instrument, days, popsize, strategy='trend_ema'):
     Andividual.mate = cxTwoPoint
     Andividual.mutate = partial(mutGaussian, mu=0, sigma=sigma, indpb=indpb)
     # Andividual.strategy = strategy
-    strategies = parsing.strategies()
-    Andividual.strategies = [st for st in strategies if 'forex' not in st]
+    # strategies = parsing.strategies()
+    # Andividual.strategies = [st for st in strategies if 'forex' not in st]
+    Andividual.strategies = strategies
     print('using strategies:', Andividual.strategies)
     print(colored(f"Mating function is ", 'blue') + colored(Andividual.mate, 'green'))
     print(colored(f"Mutating function is ", 'blue') + colored(Andividual.mutate, 'green'))
