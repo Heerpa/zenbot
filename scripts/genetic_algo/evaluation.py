@@ -30,10 +30,15 @@ def runzen(cmdline):
     ansi_escape = re.compile(b'\x1b[^m]*m')
     with open(os.devnull, 'w') as devnull:
         try:
+            # print('input')
+            # print(cmdline)
             a = subprocess.check_output(shlex.split(cmdline), stderr=devnull)
         except Exception as e:
+            # print('error')
             # print(e)
             return -100.0, 0.0
+    # print('output')
+    # print(a)
     profit = a.split(b'}')[-1].splitlines()[3].split(b': ')[-1]
     profit = ansi_escape.sub(b'', profit)[:-1]
     trades = parse_trades(a.split(b'}')[-1].splitlines()[4])
@@ -56,6 +61,7 @@ class Andividual(Individual):
         # arguments - parameter names
         self.args = []
         # values for arguments
+        # print(params_default)
         for arg, desc in params_default[self.strategy].items():
             self.args.append(arg)
             mid = desc['default']
@@ -220,8 +226,8 @@ def evaluate_zen(cmdline:str, days: int):
         fitness = []
         for period in periods:
             cmd = ' '.join([cmdline, period])
-            print('evaluating')
-            print(cmd)
+            # print('evaluating')
+            # print(cmd)
             f,t = runzen(cmd)
             fitness.append(f)
             if t==0:

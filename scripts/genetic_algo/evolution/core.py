@@ -54,6 +54,10 @@ def mutate(population):
     mutants = []
     for individual in population:
         if random.random() < mutpb:
+            # print('mutating')
+            # print(individual)
             mutants.append(~individual)
+            # print('result')
+            # print(mutants[-1])
     print(colored(len(mutants), 'green') + colored(f" individuals have mutated.", 'blue'))
     return mutants

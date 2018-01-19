@@ -12,7 +12,7 @@ class FitnessMax(Fitness):
 
 class Individual(list):
     mate = lambda *x: x
-    mutate = lambda x: x
+    mutate = lambda x: x  # overwritten by the mutate function in main
 
     @property
     def objective(self):

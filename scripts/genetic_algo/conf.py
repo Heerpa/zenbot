@@ -18,14 +18,17 @@ indpb = 0.3
 mutpb = 0.3
 cxpb = 0.3
 
+# strategies = ['crossover_vwap', 'trend_ema', 'cci_srsi', 'macd']
 strategies = ['trend_ema']
+# need to debug:
+# crossover_vwap, cci_srsi, macd
 
 # parameters for strategies
 params_default = {}
 params_default['crossover_vwap'] = {
     # common
     'period': {'min': 1, 'max': 400, 'default': 120,
-               'dtype': np.int32, 'unit': 'm'},  # RangePeriod(1, 400, 'm'),
+               'std': 2, 'dtype': np.int32, 'unit': 'm'},  # RangePeriod(1, 400, 'm'),
     # 'min_periods': {'min': 1, 'max': 200, 'default': 200,
     #                 'dtype': np.int32},  # Range(1, 200),
     # 'markdown_buy_pct': {'min': -1, 'max': 5, 'default': 200,
@@ -34,15 +37,15 @@ params_default['crossover_vwap'] = {
     #                     'dtype': np.float64},  # RangeFloat(-1, 5),
     # -- strategy
     'emalen1': {'min': 1, 'max': 300, 'default': 30,
-                'dtype': np.int32, 'unit': ''},  # Range(1, 300),
+                'std': 2, 'dtype': np.int32, 'unit': ''},  # Range(1, 300),
     'smalen1': {'min': 1, 'max': 300, 'default': 108,
-                'dtype': np.int32, 'unit': ''},  # Range(1, 300),
+                'std': 2, 'dtype': np.int32, 'unit': ''},  # Range(1, 300),
     'smalen2': {'min': 1, 'max': 300, 'default': 60,
-                'dtype': np.int32, 'unit': ''},  # Range(1, 300),
+                'std': 2, 'dtype': np.int32, 'unit': ''},  # Range(1, 300),
     'vwap_length': {'min': 1, 'max': 300, 'default': 10,
-                    'dtype': np.int32, 'unit': ''},  # Range(1, 300),
+                    'std': 2, 'dtype': np.int32, 'unit': ''},  # Range(1, 300),
     'vwap_max': {'min': 0, 'max': 10000, 'default': 8000,
-                 'dtype': np.int32, 'unit': ''},  # RangeFactor(0, 10000, 10)  # 0 disables this max cap. Test in increments of 10
+                 'std': 2, 'dtype': np.int32, 'unit': ''},  # RangeFactor(0, 10000, 10)  # 0 disables this max cap. Test in increments of 10
     }
 # trend_ema (default)
 #   description:
@@ -67,29 +70,86 @@ params_default['trend_ema'] = {
     'oversold_rsi_periods': {'min': 1, 'max': 20, 'default': 10, 'std': 2,
                              'dtype': np.int32, 'unit': ''},  #
     }
-
-
-
-# cci_srsi
+# cci_srsi,
 #   description:
 #     Stochastic CCI Strategy
-#   options:
-#     --period=<value>  period length, same as --periodLength (default: 20m)
-#     --periodLength=<value>  period length, same as --period (default: 20m)
-#     --min_periods=<value>  min. number of history periods (default: 30)
-#     --ema_acc=<value>  sideways threshold (0.2-0.4) (default: 0.03)
-#     --cci_periods=<value>  number of RSI periods (default: 14)
-#     --rsi_periods=<value>  number of RSI periods (default: 14)
-#     --srsi_periods=<value>  number of RSI periods (default: 9)
-#     --srsi_k=<value>  %K line (default: 5)
-#     --srsi_d=<value>  %D line (default: 3)
-#     --oversold_rsi=<value>  buy when RSI reaches or drops below this value (default: 18)
-#     --overbought_rsi=<value>  sell when RSI reaches or goes above this value (default: 85)
-#     --oversold_cci=<value>  buy when CCI reaches or drops below this value (default: -90)
-#     --overbought_cci=<value>  sell when CCI reaches or goes above this value (default: 140)
-#     --constant=<value>  constant (default: 0.015)
-# If you have questions about this strategy, contact me... @talvasconcelos
-#
+params_default['cci_srsi'] = {
+    # --period=<value>  period length, same as --periodLength (default: 20m)
+    'period': {'min': 1, 'max': 120, 'default': 20, 'std': 2,
+               'dtype': np.int32, 'unit': 'm'},
+    # --min_periods=<value>  min. number of history periods (default: 30)
+    'min_periods': {'min': 1, 'max': 200, 'default': 30, 'std': 2,
+                    'dtype': np.int32, 'unit': ''},
+    # --ema_acc=<value>  sideways threshold (0.2-0.4) (default: 0.03)
+    'ema_acc': {'min': 0, 'max': 1, 'default': 0.03, 'std': .1,
+                'dtype': np.float64, 'unit': ''},
+    # --cci_periods=<value>  number of RSI periods (default: 14)
+    'cci_periods': {'min': 1, 'max': 200, 'default': 14, 'std': 2,
+                    'dtype': np.int32, 'unit': ''},
+    # --rsi_periods=<value>  number of RSI periods (default: 14)
+    'rsi_periods': {'min': 1, 'max': 200, 'default': 14, 'std': 2,
+                    'dtype': np.int32, 'unit': ''},
+    # --srsi_periods=<value>  number of RSI periods (default: 9)
+    'srsi_periods': {'min': 1, 'max': 200, 'default': 9, 'std': 2,
+                     'dtype': np.int32, 'unit': ''},
+    # --srsi_k=<value>  %K line (default: 5)
+    'srsi_k': {'min': 1, 'max': 50, 'default': 5, 'std': 2,
+               'dtype': np.int32, 'unit': ''},
+    # --srsi_d=<value>  %D line (default: 3)
+    'srsi_d': {'min': 1, 'max': 50, 'default': 3, 'std': 2,
+               'dtype': np.int32, 'unit': ''},
+    # --oversold_rsi=<value>  buy when RSI reaches or drops below this value (default: 18)
+    'oversold_rsi': {'min': 1, 'max': 100, 'default': 18, 'std': 2,
+                     'dtype': np.int32, 'unit': ''},
+    # --overbought_rsi=<value>  sell when RSI reaches or goes above this value (default: 85)
+    'overbought_rsi': {'min': 1, 'max': 100, 'default': 85, 'std': 2,
+                       'dtype': np.int32, 'unit': ''},
+    # --oversold_cci=<value>  buy when CCI reaches or drops below this value (default: -90)
+    'oversold_cci': {'min': -100, 'max': 100, 'default': -90, 'std': 2,
+                     'dtype': np.int32, 'unit': ''},
+    # --overbought_cci=<value>  sell when CCI reaches or goes above this value (default: 140)
+    'oversold_cci': {'min': -100, 'max': 300, 'default': 140, 'std': 2,
+                     'dtype': np.int32, 'unit': ''},
+    # --constant=<value>  constant (default: 0.015)
+    'oversold_cci': {'min': 0.001, 'max': 0.05, 'default': 0.015,
+                     'std': 0.02, 'dtype': np.float64, 'unit': ''},
+    }
+# macd
+#   description:
+#     Buy when (MACD - Signal > 0) and sell when (MACD - Signal < 0).
+params_default['macd'] = {
+    # --period=<value>  period length, same as --periodLength (default: 1h)
+    'period': {'min': 1, 'max': 240, 'default': 60, 'std': 5,
+               'dtype': np.int32, 'unit': 'm'},
+    # --min_periods=<value>  min. number of history periods (default: 52)
+    'min_periods': {'min': 1, 'max': 200, 'default': 52, 'std': 2,
+                    'dtype': np.int32, 'unit': ''},
+    # --ema_short_period=<value>  number of periods for the shorter EMA (default: 12)
+    'ema_short_period': {'min': 1, 'max': 20, 'default': 12, 'std': 1,
+                         'dtype': np.int32, 'unit': ''},
+    # --ema_long_period=<value>  number of periods for the longer EMA (default: 26)
+    'ema_long_period': {'min': 20, 'max': 100, 'default': 26, 'std': 2,
+                        'dtype': np.int32, 'unit': ''},
+    # --signal_period=<value>  number of periods for the signal EMA (default: 9)
+    'signal_period': {'min': 1, 'max': 20, 'default': 9, 'std': 1,
+                      'dtype': np.int32, 'unit': ''},
+    # --up_trend_threshold=<value>  threshold to trigger a buy signal (default: 0)
+    'up_trend_threshold': {'min': 0, 'max': 50, 'default': 0, 'std': 1,
+                           'dtype': np.int32, 'unit': ''},
+    # --down_trend_threshold=<value>  threshold to trigger a sold signal (default: 0)
+    'down_trend_threshold': {'min': 0, 'max': 50, 'default': 0, 'std': 1,
+                             'dtype': np.int32, 'unit': ''},
+    # --overbought_rsi_periods=<value>  number of periods for overbought RSI (default: 25)
+    'overbought_rsi_periods': {'min': 1, 'max': 50, 'default': 25,
+                               'std': 1, 'dtype': np.int32, 'unit': ''},
+    # --overbought_rsi=<value>  sold when RSI exceeds this value (default: 70)
+    'overbought_rsi': {'min': 20, 'max': 100, 'default': 70,
+                       'std': 1, 'dtype': np.int32, 'unit': ''},
+    }
+
+
+
+
 #
 # forex_analytics
 #   description:
@@ -100,20 +160,6 @@ params_default['trend_ema'] = {
 #     --periodLength=<value>  period length of a candlestick (default: 30m), same as --period (default: 30m)
 #     --min_periods=<value>  min. number of history periods (default: 100)
 #
-# macd
-#   description:
-#     Buy when (MACD - Signal > 0) and sell when (MACD - Signal < 0).
-#   options:
-#     --period=<value>  period length, same as --periodLength (default: 1h)
-#     --periodLength=<value>  period length, same as --period (default: 1h)
-#     --min_periods=<value>  min. number of history periods (default: 52)
-#     --ema_short_period=<value>  number of periods for the shorter EMA (default: 12)
-#     --ema_long_period=<value>  number of periods for the longer EMA (default: 26)
-#     --signal_period=<value>  number of periods for the signal EMA (default: 9)
-#     --up_trend_threshold=<value>  threshold to trigger a buy signal (default: 0)
-#     --down_trend_threshold=<value>  threshold to trigger a sold signal (default: 0)
-#     --overbought_rsi_periods=<value>  number of periods for overbought RSI (default: 25)
-#     --overbought_rsi=<value>  sold when RSI exceeds this value (default: 70)
 #
 # neural
 #   description:
@@ -251,28 +297,6 @@ params_default['trend_ema'] = {
 #     --greed=<value>  sell if we reach this much profit (0 to be greedy and either win or lose) (default: 0)
 #
 #
-# params_default['cci_srsi'] = {
-#     # -- common
-#     'periodLength': RangePeriod(1, 120, 'm'),
-#     'min_periods': Range(1, 200),
-#     'markup_pct': RangeFloat(0, 5),
-#     'order_type': RangeMakerTaker(),
-#     'sell_stop_pct': Range0(1, 50),
-#     'buy_stop_pct': Range0(1, 50),
-#     'profit_stop_enable_pct': Range0(1, 20),
-#     'profit_stop_pct': Range(1,20),
-#     # -- strategy
-#     'cci_periods': Range(1, 200),
-#     'rsi_periods': Range(1, 200),
-#     'srsi_periods': Range(1, 200),
-#     'srsi_k': Range(1, 50),
-#     'srsi_d': Range(1, 50),
-#     'oversold_rsi': Range(1, 100),
-#     'overbought_rsi': Range(1, 100),
-#     'oversold_cci': Range(-100, 100),
-#     'overbought_cci': Range(1, 100),
-#     'constant': RangeFloat(0.001, 0.05)
-#   },
 #   srsi_macd: {
 #     // -- common
 #     periodLength: RangePeriod(1, 120, 'm'),
@@ -296,26 +320,6 @@ params_default['trend_ema'] = {
 #     signal_period: Range(1, 20),
 #     up_trend_threshold: Range(0, 20),
 #     down_trend_threshold: Range(0, 20)
-#   },
-#   macd: {
-#     // -- common
-#     periodLength: RangePeriod(1, 120, 'm'),
-#     min_periods: Range(1, 200),
-#     markup_pct: RangeFloat(0, 5),
-#     order_type: RangeMakerTaker(),
-#     sell_stop_pct: Range0(1, 50),
-#     buy_stop_pct: Range0(1, 50),
-#     profit_stop_enable_pct: Range0(1, 20),
-#     profit_stop_pct: Range(1,20),
-#
-#     // -- strategy
-#     ema_short_period: Range(1, 20),
-#     ema_long_period: Range(20, 100),
-#     signal_period: Range(1, 20),
-#     up_trend_threshold: Range(0, 50),
-#     down_trend_threshold: Range(0, 50),
-#     overbought_rsi_periods: Range(1, 50),
-#     overbought_rsi: Range(20, 100)
 #   },
 #   neural: {
 #     // -- common
