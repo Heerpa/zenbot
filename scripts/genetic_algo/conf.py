@@ -19,7 +19,7 @@ mutpb = 0.3
 cxpb = 0.3
 
 # strategies = ['crossover_vwap', 'trend_ema', 'cci_srsi', 'macd']
-strategies = ['trend_ema']
+strategies = ['crossover_vwap']
 # need to debug:
 # crossover_vwap, cci_srsi, macd
 

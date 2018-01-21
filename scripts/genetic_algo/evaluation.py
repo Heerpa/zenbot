@@ -30,19 +30,27 @@ def runzen(cmdline):
     ansi_escape = re.compile(b'\x1b[^m]*m')
     with open(os.devnull, 'w') as devnull:
         try:
-            # print('input')
-            # print(cmdline)
             a = subprocess.check_output(shlex.split(cmdline), stderr=devnull)
         except Exception as e:
+            # print('input')
+            # print(cmdline)
             # print('error')
             # print(e)
             return -100.0, 0.0
+    # print('input')
+    # print(cmdline)
     # print('output')
     # print(a)
+    # print('worked')
     profit = a.split(b'}')[-1].splitlines()[3].split(b': ')[-1]
+    # print('profit:', profit)
     profit = ansi_escape.sub(b'', profit)[:-1]
+    # print('profit:', profit)
     trades = parse_trades(a.split(b'}')[-1].splitlines()[4])
+    # print('trades: ', a.split(b'}')[-1].splitlines()[4])
     trades = ansi_escape.sub(b'', trades)
+    # print('trades: ', trades)
+    # print(float(profit), float(trades))
     return float(profit), float(trades)
 
 
@@ -220,8 +228,8 @@ class Andividual(Individual):
 
 
 
-def evaluate_zen(cmdline:str, days: int):
-    periods = time_params(days, partitions)
+def evaluate_zen(cmdline:str, days: int, evolvend: str=''):
+    periods = time_params(days, partitions, evolvend)
     try:
         fitness = []
         for period in periods:
@@ -240,8 +248,11 @@ def evaluate_zen(cmdline:str, days: int):
     return tuple(fitness)
 
 
-def time_params(days: int, partitions: int) -> List[str]:
-    now = datetime.date.today()
+def time_params(days: int, partitions: int, evolvend: str='') -> List[str]:
+    if evolvend == '':
+        now = datetime.date.today()
+    else:
+        now = datetime.date(*[int(it) for it in evolvend.split('-')])
     delta = datetime.timedelta(days=days)
     splits = [now - delta / partitions * i for i in range(partitions + 1)][::-1]
     return [f' --start {start} --end {end}' for start, end in zip(splits, splits[1:])]

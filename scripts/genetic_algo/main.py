@@ -15,9 +15,9 @@ blue = partial(lambda text, color: colored(str(text), color), color='blue')
 green = partial(lambda text, color: colored(str(text), color), color='green')
 
 
-def main(instrument, days, popsize, strategy='trend_ema'):
+def main(instrument, days, popsize, strategy='trend_ema', evolvend: str=''):
     print(colored("Starting evolution....", 'blue'))
-    evaluate = partial(evaluate_zen, days=days)
+    evaluate = partial(evaluate_zen, days=days, evolvend=evolvend)
     print(blue("Evaluating ")+green(popsize)+blue(" individuals over ") + green(days) + blue(' days in ') + green(partitions) + blue(' partitions.'))
     try:
         Andividual.instruments = selectors[instrument]
@@ -26,10 +26,10 @@ def main(instrument, days, popsize, strategy='trend_ema'):
         Andividual.instruments = [instrument]
     Andividual.mate = cxTwoPoint
     Andividual.mutate = partial(mutGaussian, mu=0, sigma=sigma, indpb=indpb)
-    # Andividual.strategy = strategy
-    # strategies = parsing.strategies()
+    # strategies = parsing.strategies()  # to use all given by list command
     # Andividual.strategies = [st for st in strategies if 'forex' not in st]
-    Andividual.strategies = strategies
+    Andividual.strategies = strategies  # to select all defined in conf.py
+    Andividual.strategies = [strategy]  # to select the one given by user
     print('using strategies:', Andividual.strategies)
     print(colored(f"Mating function is ", 'blue') + colored(Andividual.mate, 'green'))
     print(colored(f"Mutating function is ", 'blue') + colored(Andividual.mutate, 'green'))
@@ -48,7 +48,11 @@ if __name__ == '__main__':
         strategy = sys.argv[4]
     except:
         strategy = 'trend_ema'
+    try:
+        evolvend = sys.argv[5]  # format: yyyy-mm-dd
+    except:
+        evolvend = ''
     print(colored("MAKE SURE YOU RUN fab backfill_local:<days>", 'red'))
     print(colored("otherwise it's all crap", 'red'))
-    res = main(INSTRUMENT, TOTAL_DAYS, popsize, strategy)
+    res = main(INSTRUMENT, TOTAL_DAYS, popsize, strategy, evolvend)
     print(res)
