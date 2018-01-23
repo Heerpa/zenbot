@@ -10,9 +10,9 @@ from evolution.individual_base import Individual
 
 def harsh_winter(population: Set[Individual], count: int) -> Set[Individual]:
     """ Selects `popsize` many individuals from the current population."""
-    elitist_count = int(count * 0.2)
+    elitist_count = int(count * 0.3)
     specialist_count = int(count * 0.3 / partitions)
-    allrounder_count = int(count * 0.3)
+    allrounder_count = int(count * 0.05)
     elites = select_elites(population, elitist_count)
     difference = population - elites
     specialists = select_specialists(difference, specialist_count)
@@ -47,6 +47,8 @@ def select_allrounders(individuals: Iterable[Individual], count: int):
     allround_fittest = sorted(individuals,
                               reverse=True,
                               key=lambda x: min(x.fitness.values[:]))
+    print('allround_fittest')
+    print(allround_fittest)
     allrounders = set(allround_fittest[:count])
     return allrounders
 

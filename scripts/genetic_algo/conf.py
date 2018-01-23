@@ -9,7 +9,7 @@ selectors = {
     'ETH-USD': ['gdax.ETH-USD'],
     'ETH-CUR': ['gdax.ETH-USD', 'gdax.ETH-EUR'],
 }
-partitions = 2
+partitions = 5
 selectivity = 0.3
 
 runid = random.randint(1000, 9999)
