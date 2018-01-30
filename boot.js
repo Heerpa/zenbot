@@ -26,20 +26,28 @@ module.exports = function (cb) {
   }
 
   var authStr = '', authMechanismStr, authMechanism;
-  
+
   if(c.mongo.username){
     authStr = encodeURIComponent(c.mongo.username)
-    
+
     if(c.mongo.password) authStr += ':' + encodeURIComponent(c.mongo.password)
 
-    authStr += '@'  
-      
+    authStr += '@'
+
     // authMechanism could be a conf.js parameter to support more mongodb authentication methods
     authMechanism = 'DEFAULT'
   }
-  
-  var u = 'mongodb://' + authStr + c.mongo.host + ':' + c.mongo.port + '/' + c.mongo.db + '?' + (c.mongo.replicaSet ? '&replicaSet=' + c.mongo.replicaSet : '' ) + (authMechanism ? '&authMechanism=' + authMechanism : '' )
-  require('mongodb').MongoClient.connect(u, function (err, db) {
+
+  var u = (function() {
+    if (c.mongo.connectionString) {
+      return c.mongo.connectionString
+    }
+
+    return 'mongodb://' + authStr + c.mongo.host + ':' + c.mongo.port + '/' + c.mongo.db + '?' +
+      (c.mongo.replicaSet ? '&replicaSet=' + c.mongo.replicaSet : '' ) +
+      (authMechanism ? '&authMechanism=' + authMechanism : '' )
+  })()
+  require('mongodb').MongoClient.connect(u, function (err, client) {
     if (err) {
       zenbot.set('zenbot:db.mongo', null)
       console.error('WARNING: MongoDB Connection Error: ', err)
@@ -47,6 +55,7 @@ module.exports = function (cb) {
       console.error('Attempted authentication string: ' + u);
       return withMongo()
     }
+    var db = client.db(c.mongo.db)
     zenbot.set('zenbot:db.mongo', db)
     withMongo()
   })
@@ -66,6 +75,7 @@ module.exports = function (cb) {
         try {
           conf = require(_allArgs[0])
         } catch (ee) {
+          console.log('Fall back to conf.js, ' + ee)
           conf = require('./conf')
         }
       } else {
@@ -73,6 +83,7 @@ module.exports = function (cb) {
       }
     }
     catch (e) {
+      console.log('Fall back to sample-conf.js, ' + e)
       conf = {}
     }
 
