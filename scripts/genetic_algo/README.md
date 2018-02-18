@@ -28,3 +28,5 @@ $ python -m scoop main.py BTC-CUR 3
 
 Important: before usage, create directory
 scripts/genetic_algo/logs/hof
+
+to simulate or trade, use arguments as in the hof. using config file for sim seems not to work with gdax

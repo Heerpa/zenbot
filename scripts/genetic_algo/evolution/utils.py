@@ -1,5 +1,6 @@
 import networkx as networkx
 import numpy
+import pickle
 from deap.tools import Statistics
 from matplotlib import pyplot as plt
 from termcolor import colored
@@ -30,6 +31,17 @@ def log_stuff(g, history, hof, population, stats):
     hof.persist()
     print(colored(f'\nGeneration {g} {record}', 'green') )
     # print(hof)
+
+
+def save_pop(population):
+    filehan = open('logs/{runid}_currpop.txt'.format(runid=runid), 'wb')
+    pickle.dump(population, filehan)
+    # save(population, 'logs/{runid}_currpop.txt'.format(runid=runid))
+
+
+def load_pop():
+    pop = load('logs/{runid}_currpop.txt'.format(runid=runid))
+    return pop
 
 
 def statsa():

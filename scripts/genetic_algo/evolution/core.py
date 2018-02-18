@@ -5,6 +5,7 @@ from termcolor import colored
 
 from conf import cxpb, mutpb
 from .utils import log_stuff
+from .utils import save_pop, load_pop
 
 
 def algorithm(individual,popsize,map,evaluate,select,breed,mutate,stats,history,hof):
@@ -19,6 +20,7 @@ def algorithm(individual,popsize,map,evaluate,select,breed,mutate,stats,history,
     # Commence evolution
     for g in range(0, 1000):
         log_stuff(g, history, hof, population, stats)
+        save_pop(population)
         print(colored(f"It's breeding season, we're expecting new members of the tribe...", 'blue'))
         offspring = breed(population)
         print(colored(f"Radiation and toxic waste are causing mutations in the population...", 'blue'))
